@@ -11,7 +11,6 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Quite You">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,327 +20,684 @@
     box-sizing: border-box;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
-    --bg: #F2C230;
-    --ink: #3A1F4A;
-    --paper: #FFF8E7;
-    --calm: #4FB39A;
-    --warn: #F08A24;
-    --alarm: #E8412C;
-    --soft: rgba(58,31,74,.14);
+    --bg: #F2C230; --ink: #3A1F4A; --paper: #FFF8E7; --calm: #4FB39A; --alarm: #E8412C;
+    --soft: rgba(58,31,74,.14); --shade: rgba(58,31,74,.07);
   }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #2A1636; --ink: #FFE7A3; --paper: #3B2249; --soft: rgba(255,231,163,.16);
-    }
+    :root:not([data-theme="light"]) { --bg: #2A1636; --ink: #FFE7A3; --paper: #3B2249; --soft: rgba(255,231,163,.16); --shade: rgba(255,231,163,.07); }
   }
-  :root[data-theme="dark"] {
-    --bg: #2A1636; --ink: #FFE7A3; --paper: #3B2249; --soft: rgba(255,231,163,.16);
-  }
+  :root[data-theme="dark"] { --bg: #2A1636; --ink: #FFE7A3; --paper: #3B2249; --soft: rgba(255,231,163,.16); --shade: rgba(255,231,163,.07); }
   *, *::before, *::after { box-sizing: inherit; }
   html { scroll-padding-top: env(safe-area-inset-top, 0px); }
-  body {
-    margin: 0; background: var(--bg); color: var(--ink);
-    font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    min-height: 100%; transition: background .15s;
-  }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif; min-height: 100%; -webkit-tap-highlight-color: transparent; }
   body.alarm { animation: flash .25s steps(2) infinite; }
   @keyframes flash { 0% { background: var(--alarm); } 100% { background: var(--bg); } }
   @media (prefers-reduced-motion: reduce) { body.alarm { animation: none; background: var(--alarm); } }
+  body.locked { overflow: hidden; }
 
-  main { max-width: 34rem; margin: 0 auto; padding: 1.25rem 1rem 2.5rem; }
-  h1 {
-    font-family: 'Bungee', 'Arial Black', Impact, sans-serif;
-    font-size: clamp(2rem, 9vw, 3.2rem); line-height: .95; margin: .5rem 0 .25rem;
-    letter-spacing: -.01em; transform: rotate(-2deg); transform-origin: left;
-  }
-  .sub { margin: 0 0 1.25rem; font-weight: 700; opacity: .8; }
+  main { max-width: 34rem; margin: 0 auto; padding: 1rem 1rem 2.5rem; }
+  header { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; }
+  h1 { font-family: 'Bungee', 'Arial Black', Impact, sans-serif; font-size: clamp(2rem, 9vw, 3rem); line-height: .95; margin: .5rem 0 .25rem; transform: rotate(-2deg); transform-origin: left; }
+  h2 { font-family: 'Bungee', 'Arial Black', sans-serif; font-size: 1.15rem; margin: 0 0 .6rem; letter-spacing: .01em; }
+  .sub { margin: 0 0 1rem; font-weight: 700; opacity: .8; }
+  .iconbtn { background: transparent; color: var(--ink); border: 3px solid var(--ink); border-radius: 999px; width: 2.9rem; height: 2.9rem; padding: 0; font-size: 1.25rem; flex: none; margin-top: .4rem; }
 
-  .gauge { background: var(--paper); border: 3px solid var(--ink); border-radius: 22px 22px 8px 8px; padding: 1rem 1rem .75rem; box-shadow: 6px 6px 0 var(--ink); }
-  .gauge svg { width: 100%; height: auto; display: block; }
+  .gauge { background: var(--paper); border: 3px solid var(--ink); border-radius: 22px 22px 8px 8px; padding: .9rem .9rem .7rem; box-shadow: 6px 6px 0 var(--ink); }
+  .gauge svg { width: 100%; height: auto; display: block; max-height: 40vh; }
   .reading { text-align: center; margin-top: -.5rem; }
-  .db { font-family: 'Bungee', 'Arial Black', sans-serif; font-size: clamp(3rem, 16vw, 5rem); line-height: 1; }
+  .db { font-family: 'Bungee', 'Arial Black', sans-serif; font-size: clamp(2.8rem, 14vw, 4.4rem); line-height: 1; }
   .db small { font-size: .35em; }
-  .verdict { font-weight: 800; font-size: 1.1rem; min-height: 1.5em; }
+  .verdict { font-weight: 800; font-size: 1.05rem; min-height: 1.5em; }
+  .status { font-size: .82rem; font-weight: 700; opacity: .75; margin-top: .35rem; }
 
-  .panel { margin-top: 1.5rem; }
-  label { font-weight: 800; display: block; margin-bottom: .35rem; }
+  .card { background: var(--paper); border: 3px solid var(--ink); border-radius: 16px; padding: 1rem; margin-top: 1.25rem; }
+  .panel { margin-top: 1.75rem; }
+  label, .lbl { font-weight: 800; display: block; margin-bottom: .35rem; }
   .row { display: flex; gap: .6rem; align-items: center; }
-  input[type=range] { flex: 1; accent-color: var(--alarm); height: 2rem; }
-  .thr { font-family: 'Bungee', sans-serif; min-width: 4.5ch; text-align: right; font-size: 1.2rem; }
+  .hint { font-size: .85rem; font-weight: 600; opacity: .75; margin: .3rem 0 0; }
+  input[type=range] { flex: 1; accent-color: var(--alarm); height: 2rem; min-width: 0; }
+  .val { font-family: 'Bungee', sans-serif; min-width: 4.5ch; text-align: right; font-size: 1.1rem; }
 
-  button {
-    font: 800 1.1rem 'Nunito', system-ui, sans-serif; color: var(--paper); background: var(--ink);
-    border: 3px solid var(--ink); border-radius: 999px; padding: .8rem 1.4rem; cursor: pointer;
-  }
-  button.secondary { background: transparent; color: var(--ink); padding: .5rem 1rem; font-size: .95rem; }
+  button { font: 800 1.05rem 'Nunito', system-ui, sans-serif; color: var(--paper); background: var(--ink); border: 3px solid var(--ink); border-radius: 999px; padding: .75rem 1.3rem; cursor: pointer; }
+  button.secondary { background: transparent; color: var(--ink); padding: .45rem .95rem; font-size: .95rem; }
+  button.small { padding: .3rem .8rem; font-size: .88rem; }
+  button.danger { color: var(--alarm); border-color: var(--alarm); background: transparent; }
+  button:disabled { opacity: .45; cursor: default; }
   button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px dashed var(--alarm); outline-offset: 3px; }
-  .start { width: 100%; margin-top: 1.25rem; font-size: 1.3rem; }
+  .start { width: 100%; margin-top: 1.1rem; font-size: 1.3rem; }
 
-  select, input[type=text] {
-    font: 700 1rem 'Nunito', system-ui, sans-serif; color: var(--ink); background: var(--paper);
-    border: 3px solid var(--ink); border-radius: 12px; padding: .55rem .7rem; flex: 1; min-width: 0;
-  }
-  .board { list-style: none; padding: 0; margin: .75rem 0 0; }
-  .board li { display: flex; justify-content: space-between; padding: .55rem .2rem; border-bottom: 2px dashed var(--soft); font-weight: 700; }
-  .board li:first-child { font-size: 1.15rem; }
-  .board .crown { margin-right: .35rem; }
-  .board .score { font-family: 'Bungee', sans-serif; }
+  select, input[type=text] { font: 700 1rem 'Nunito', system-ui, sans-serif; color: var(--ink); background: var(--paper); border: 3px solid var(--ink); border-radius: 12px; padding: .55rem .7rem; flex: 1; min-width: 0; }
+
+  .switch { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: .7rem 0; border-bottom: 2px dashed var(--soft); cursor: pointer; }
+  .switch span { font-weight: 800; }
+  .switch small { display: block; font-weight: 600; opacity: .75; }
+  .switch input { appearance: none; -webkit-appearance: none; width: 3.2rem; height: 1.9rem; border-radius: 999px; background: var(--soft); border: 3px solid var(--ink); position: relative; flex: none; cursor: pointer; margin: 0; }
+  .switch input::after { content: ''; position: absolute; top: 2px; left: 2px; width: 1.2rem; height: 1.2rem; border-radius: 50%; background: var(--ink); transition: transform .15s; }
+  .switch input:checked { background: var(--calm); }
+  .switch input:checked::after { transform: translateX(1.3rem); }
+  .seg { display: flex; border: 3px solid var(--ink); border-radius: 999px; overflow: hidden; }
+  .seg label { flex: 1; margin: 0; text-align: center; padding: .45rem .3rem; cursor: pointer; font-size: .9rem; }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label:has(input:checked) { background: var(--ink); color: var(--paper); }
+
+  .list { list-style: none; padding: 0; margin: 0; }
+  .list li { display: flex; justify-content: space-between; align-items: center; gap: .6rem; padding: .6rem .1rem; border-bottom: 2px dashed var(--soft); font-weight: 700; }
+  .list li:last-child { border-bottom: 0; }
+  .grow { flex: 1; min-width: 0; }
+  .meta { font-size: .82rem; font-weight: 600; opacity: .72; display: block; }
+  .score { font-family: 'Bungee', sans-serif; white-space: nowrap; }
+  .board li:first-child .who { font-size: 1.15rem; }
   .empty { opacity: .7; font-weight: 600; }
-  .note { font-size: .85rem; opacity: .75; margin-top: 1.5rem; }
+  .ev { cursor: pointer; }
+  .ev.mystery { background: var(--shade); border-radius: 10px; padding-left: .5rem; padding-right: .5rem; }
+  .tag { font-size: .8rem; font-weight: 800; border: 2px solid var(--ink); border-radius: 999px; padding: .1rem .55rem; white-space: nowrap; }
+  .tag.alert { background: var(--alarm); border-color: var(--alarm); color: #fff; }
+  .last { display: none; }
+  .last.show { display: block; }
+  .last .big { font-family: 'Bungee', sans-serif; font-size: 1.3rem; line-height: 1.1; margin: .1rem 0 .3rem; }
+  .last .row { margin-top: .6rem; flex-wrap: wrap; }
+
+  .note { font-size: .85rem; opacity: .75; margin-top: 1.75rem; }
   .err { background: var(--alarm); color: #fff; padding: .75rem 1rem; border-radius: 12px; font-weight: 700; margin-top: 1rem; display: none; }
-
-  .shout {
-    position: fixed; inset: 0; display: none; align-items: center; justify-content: center; text-align: center;
-    font-family: 'Bungee', 'Arial Black', sans-serif; font-size: clamp(3rem, 15vw, 8rem); line-height: .95;
-    color: #fff; text-shadow: 5px 5px 0 var(--ink); padding: 1rem; pointer-events: none; z-index: 10;
-  }
-  body.alarm .shout { display: flex; }
-
-  .gate {
-    position: fixed; inset: 0; z-index: 20; background: var(--bg); display: none;
-    flex-direction: column; align-items: center; justify-content: center; text-align: center;
-    padding: calc(2rem + env(safe-area-inset-top, 0px)) 1.5rem calc(2rem + env(safe-area-inset-bottom, 0px));
-  }
-  body.needs-mic .gate { display: flex; }
-  .gate img { width: 7rem; height: 7rem; border-radius: 1.6rem; border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); }
-  .gate h2 { font-family: 'Bungee', 'Arial Black', sans-serif; font-size: clamp(1.8rem, 8vw, 2.6rem); line-height: 1; margin: 1.5rem 0 .75rem; }
-  .gate p { max-width: 22rem; font-weight: 700; margin: 0 0 1.5rem; line-height: 1.45; }
-  .gate button { font-size: 1.25rem; padding: 1rem 2rem; }
-  .gate .err { max-width: 22rem; text-align: left; }
-  .install { margin-top: 1.5rem; padding: 1rem; border: 3px dashed var(--ink); border-radius: 16px; display: none; }
+  .install { padding: 1rem; border: 3px dashed var(--ink); border-radius: 16px; display: none; margin-top: 1.75rem; }
   .install p { margin: 0 0 .6rem; font-weight: 700; }
   .install.show { display: block; }
+
+  /* Overlays */
+  .shout { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-family: 'Bungee', 'Arial Black', sans-serif; color: #fff; text-shadow: 5px 5px 0 #3A1F4A; padding: 1rem; pointer-events: none; z-index: 40; }
+  .shout #shoutText { font-size: clamp(3rem, 15vw, 7.5rem); line-height: .95; }
+  .shout #shoutName { font-size: clamp(1.6rem, 8vw, 3.5rem); margin-top: 1rem; }
+  body.alarm .shout { display: flex; }
+  .dim { position: fixed; inset: 0; background: #000; color: #6b6b6b; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 30; text-align: center; padding: 1rem; }
+  body.dimmed .dim { display: flex; }
+  body.dimmed.alarm .dim { display: none; }
+  .dim .dimdb { font-family: 'Bungee', sans-serif; font-size: 3rem; }
+  .dim p { font-weight: 700; margin: .5rem 0 0; }
+
+  .gate, .sheet { position: fixed; inset: 0; z-index: 20; background: var(--bg); display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: calc(1.5rem + env(safe-area-inset-top, 0px)) 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px)); overflow-y: auto; }
+  body.needs-mic .gate { display: flex; }
+  .sheet.open { display: flex; }
+  .gate img { width: 7rem; height: 7rem; border-radius: 1.6rem; border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); }
+  .gate h2, .sheet h2 { font-size: clamp(1.6rem, 7vw, 2.3rem); line-height: 1.05; margin: 1.25rem 0 .75rem; }
+  .gate p, .sheet p { max-width: 24rem; font-weight: 700; margin: 0 auto 1.25rem; line-height: 1.45; }
+  .gate .err { max-width: 22rem; text-align: left; }
+  .sheet .inner { width: 100%; max-width: 26rem; margin: auto; }
+  .sheet .close { position: absolute; top: calc(.75rem + env(safe-area-inset-top, 0px)); right: .75rem; }
+  .step { font-weight: 800; opacity: .7; letter-spacing: .04em; text-transform: uppercase; font-size: .85rem; }
+  .prompt { font-family: 'Bungee', sans-serif; font-size: clamp(1.3rem, 6vw, 1.8rem); line-height: 1.15; margin: .5rem 0; }
+  .quote { background: var(--paper); border: 3px solid var(--ink); border-radius: 16px; padding: 1rem; font-size: 1.25rem; font-weight: 800; margin: .75rem 0 1.25rem; }
+  .meter { height: 1rem; border: 3px solid var(--ink); border-radius: 999px; overflow: hidden; background: var(--paper); margin: 1rem 0; }
+  .meter i { display: block; height: 100%; width: 0; background: var(--calm); transition: width .06s linear; }
+  .meter.rec i { background: var(--alarm); }
+  .count { font-family: 'Bungee', sans-serif; font-size: 4rem; line-height: 1; margin: .5rem 0; }
+  .progress { height: .5rem; background: var(--soft); border-radius: 999px; overflow: hidden; margin: .75rem 0 0; }
+  .progress i { display: block; height: 100%; background: var(--ink); }
+  .chips { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin: 1rem 0; }
+  .chips button { background: var(--paper); color: var(--ink); }
+  .chips button.on { background: var(--ink); color: var(--paper); }
+  .bars { text-align: left; margin: 1rem 0; }
+  .bars div { display: flex; align-items: center; gap: .5rem; font-weight: 800; margin: .35rem 0; }
+  .bars span:first-child { width: 6.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bars b { flex: 1; height: .9rem; background: var(--soft); border-radius: 999px; overflow: hidden; }
+  .bars b i { display: block; height: 100%; background: var(--calm); }
+  .btnrow { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; }
+
+  /* Landscape: dial on the left, everything else on the right */
+  @media (orientation: landscape) and (min-width: 640px) {
+    main { max-width: 64rem; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 2rem; }
+    .left { position: sticky; top: env(safe-area-inset-top, 0px); align-self: start; max-height: 100vh; overflow-y: auto; padding-bottom: 1rem; }
+    .right > .panel:first-child, .right > .card:first-child { margin-top: 1rem; }
+    .gauge svg { max-height: 34vh; }
+    h1 { font-size: 2rem; }
+    .sub { display: none; }
+  }
 </style>
 </head>
 <body>
+<div class="shout" aria-live="assertive"><div id="shoutText">SHHH!</div><div id="shoutName"></div></div>
+
+<div class="dim" id="dim" role="button" aria-label="Wake the screen">
+  <div class="dimdb"><span id="dimDb">--</span> dB</div>
+  <p>Still listening · tap to wake</p>
+</div>
+
 <div class="gate" role="dialog" aria-labelledby="gateTitle">
   <img src="icon-192.png" alt="">
   <h2 id="gateTitle">Can I listen in?</h2>
-  <p>Quite You needs your microphone to hear who's the loudest. Nothing is recorded or sent anywhere — it only measures volume.</p>
+  <p>Quite You needs your microphone to hear who's the loudest. Nothing is recorded or uploaded — sound is checked on this phone and thrown away.</p>
   <button id="gateBtn">Allow microphone</button>
   <div class="err" id="gateErr"></div>
 </div>
-<div class="shout" aria-live="assertive"><span id="shoutText">QUIET<br>DOWN<br>YOU!</span></div>
+
+<div class="sheet" id="enroll" role="dialog" aria-label="Record voice profile">
+  <button class="secondary small close" id="enrollClose">Cancel</button>
+  <div class="inner" id="enrollBody"></div>
+</div>
+
+<div class="sheet" id="assign" role="dialog" aria-label="Who made that noise">
+  <button class="secondary small close" id="assignClose">Close</button>
+  <div class="inner" id="assignBody"></div>
+</div>
+
 <main>
-  <h1>Quite You!</h1>
-  <p class="sub">The family noise police. Get too loud and the phone yells back.</p>
+  <div class="left">
+    <header>
+      <h1>Quite You!</h1>
+      <button class="iconbtn" id="dimBtn" aria-label="Dim the screen">🌙</button>
+    </header>
+    <p class="sub">The family noise police. Get too loud and the phone yells back.</p>
 
-  <section class="gauge" aria-label="Noise meter">
-    <svg viewBox="0 0 300 170" role="img" aria-label="Loudness dial">
-      <defs>
-        <linearGradient id="arcg" x1="0" x2="1">
-          <stop offset="0" stop-color="#4FB39A"/><stop offset=".55" stop-color="#F08A24"/><stop offset="1" stop-color="#E8412C"/>
-        </linearGradient>
-      </defs>
-      <path d="M30 150 A120 120 0 0 1 270 150" fill="none" stroke="url(#arcg)" stroke-width="22" stroke-linecap="round"/>
-      <g id="ticks"></g>
-      <line id="thrMark" x1="150" y1="150" x2="150" y2="22" stroke="currentColor" stroke-width="3" stroke-dasharray="5 4"/>
-      <g id="needle" style="transform-origin:150px 150px">
-        <polygon points="146,150 154,150 150,40" fill="currentColor"/>
-      </g>
-      <circle cx="150" cy="150" r="11" fill="currentColor"/>
-    </svg>
-    <div class="reading">
-      <div class="db"><span id="db">--</span><small> dB</small></div>
-      <div class="verdict" id="verdict">Tap start to begin listening</div>
-    </div>
-  </section>
+    <section class="gauge" aria-label="Noise meter">
+      <svg viewBox="0 0 300 170" role="img" aria-label="Loudness dial">
+        <defs>
+          <linearGradient id="arcg" x1="0" x2="1">
+            <stop offset="0" stop-color="#4FB39A"/><stop offset=".55" stop-color="#F08A24"/><stop offset="1" stop-color="#E8412C"/>
+          </linearGradient>
+        </defs>
+        <path d="M30 150 A120 120 0 0 1 270 150" fill="none" stroke="url(#arcg)" stroke-width="22" stroke-linecap="round"/>
+        <g id="ticks"></g>
+        <line id="thrMark" x1="150" y1="150" x2="150" y2="22" stroke="currentColor" stroke-width="3" stroke-dasharray="5 4" style="transform-origin:150px 150px"/>
+        <g id="needle" style="transform-origin:150px 150px"><polygon points="146,150 154,150 150,40" fill="currentColor"/></g>
+        <circle cx="150" cy="150" r="11" fill="currentColor"/>
+      </svg>
+      <div class="reading">
+        <div class="db"><span id="db">--</span><small> dB</small></div>
+        <div class="verdict" id="verdict">Tap start to begin listening</div>
+        <div class="status" id="status"></div>
+      </div>
+    </section>
 
-  <button class="start" id="startBtn">Start listening</button>
-  <div class="err" id="err"></div>
+    <button class="start" id="startBtn">Start listening</button>
+    <div class="err" id="err"></div>
 
-  <section class="panel">
-    <label for="thr">Alarm goes off at</label>
-    <div class="row">
-      <input type="range" id="thr" min="50" max="100" value="75" step="1">
-      <span class="thr" id="thrVal">75</span>
-    </div>
-  </section>
-
-  <section class="panel">
-    <label for="player">Who's in the hot seat?</label>
-    <div class="row">
-      <select id="player"></select>
-      <button class="secondary" id="resetPeak">Reset scores</button>
-    </div>
-    <div class="row" style="margin-top:.6rem">
-      <input type="text" id="newName" placeholder="Add a family member" maxlength="20">
-      <button class="secondary" id="addBtn">Add</button>
-    </div>
-    <ul class="board" id="board"></ul>
-  </section>
-
-  <div class="install" id="install">
-    <p id="installText">Put Quite You on your home screen so it opens like a real app.</p>
-    <button class="secondary" id="installBtn" hidden>Add to home screen</button>
+    <section class="card last" id="last" aria-live="polite"></section>
   </div>
 
-  <p class="note">Readings are approximate — phone mics aren't lab equipment. Turn your volume all the way up for maximum shame.</p>
+  <div class="right">
+    <section class="panel" id="mysteryPanel" hidden>
+      <h2>Who did it? <span class="tag alert" id="mysteryCount"></span></h2>
+      <ul class="list" id="mystery"></ul>
+    </section>
+
+    <section class="panel">
+      <h2>Scoreboard</h2>
+      <ul class="list board" id="board"></ul>
+    </section>
+
+    <section class="panel">
+      <h2>Players</h2>
+      <ul class="list" id="players"></ul>
+      <div class="row" style="margin-top:.6rem">
+        <input type="text" id="newName" placeholder="Add a family member" maxlength="20" aria-label="New player name">
+        <button class="secondary" id="addBtn">Add</button>
+      </div>
+      <p class="hint">Tap "Record voice" for each person so the app can tell who's shouting.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Recent noises</h2>
+      <ul class="list" id="history"></ul>
+    </section>
+
+    <section class="panel">
+      <h2>Settings</h2>
+      <label for="thr">Alarm goes off at</label>
+      <div class="row">
+        <input type="range" id="thr" min="50" max="100" step="1">
+        <span class="val" id="thrVal"></span>
+      </div>
+
+      <label for="minMs" style="margin-top:1rem">Must stay loud for</label>
+      <div class="row">
+        <input type="range" id="minMs" min="200" max="1500" step="100">
+        <span class="val" id="minMsVal"></span>
+      </div>
+      <p class="hint">Longer means quick blips like notification pings are less likely to count.</p>
+
+      <div style="margin-top:.75rem">
+        <label class="switch"><span>Ignore phone sounds<small>Ringtones, pings, beeps and music</small></span><input type="checkbox" id="ignorePhone"></label>
+        <label class="switch"><span>Voice ID<small>Work out who's shouting from their voice profile</small></span><input type="checkbox" id="voiceId"></label>
+      </div>
+
+      <div class="lbl" style="margin-top:1rem">How sure before blaming someone</div>
+      <div class="seg" role="radiogroup" aria-label="Voice ID strictness">
+        <label><input type="radio" name="strict" value="relaxed">Relaxed</label>
+        <label><input type="radio" name="strict" value="normal">Normal</label>
+        <label><input type="radio" name="strict" value="strict">Very sure</label>
+      </div>
+      <p class="hint">If it's not sure enough, it yells "Someone!" and asks you who it was.</p>
+
+      <label for="hotSeat" style="margin-top:1rem">Hot seat</label>
+      <select id="hotSeat"></select>
+      <p class="hint">Gets the blame for voices when Voice ID is off or nobody has a profile yet.</p>
+
+      <div class="row" style="margin-top:1.25rem;flex-wrap:wrap">
+        <button class="secondary danger" id="resetBtn">Reset scores</button>
+      </div>
+    </section>
+
+    <div class="install" id="install">
+      <p id="installText">Put Quite You on your home screen so it opens like a real app.</p>
+      <button class="secondary" id="installBtn" hidden>Add to home screen</button>
+    </div>
+
+    <p class="note">Readings are approximate — phone mics aren't lab equipment. The screen stays on while listening, so plug in for long sessions. The first start downloads the sound smarts (about 30 MB) once; after that it works offline.</p>
+  </div>
 </main>
-
 <script>
-(function () {
-  const $ = id => document.getElementById(id);
-  const MIN = 30, MAX = 110;
-  const CAL = 94; // rough offset from dBFS to room dB
-
-  // Dial ticks
-  const ticks = $('ticks');
-  for (let v = MIN; v <= MAX; v += 10) {
-    const a = angleFor(v) * Math.PI / 180;
-    const x1 = 150 + Math.sin(a) * 100, y1 = 150 - Math.cos(a) * 100;
-    const x2 = 150 + Math.sin(a) * 88,  y2 = 150 - Math.cos(a) * 88;
-    const tx = 150 + Math.sin(a) * 74,  ty = 150 - Math.cos(a) * 74 + 4;
-    ticks.insertAdjacentHTML('beforeend',
-      `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="currentColor" stroke-width="2"/>` +
-      `<text x="${tx}" y="${ty}" font-size="11" font-family="Nunito, sans-serif" font-weight="800" text-anchor="middle" fill="currentColor">${v}</text>`);
+// Kaldi-style 80-bin log-mel fbank (hamming window, 25ms/10ms, 16 kHz), with mean normalisation.
+// Input: Float32Array of 16 kHz samples in [-1, 1]. Output: {data: Float32Array(T*80), frames: T}
+const Fbank = (() => {
+  const SR = 16000, WIN = 400, HOP = 160, NFFT = 512, BINS = 80, EPS = 1.1920928955078125e-07;
+  const mel = f => 1127 * Math.log(1 + f / 700);
+  const win = new Float32Array(WIN);
+  for (let i = 0; i < WIN; i++) win[i] = 0.54 - 0.46 * Math.cos(2 * Math.PI * i / (WIN - 1));
+  // Mel filterbank over 256 FFT bins (Kaldi ignores the Nyquist bin)
+  const lo = mel(20), hi = mel(SR / 2), d = (hi - lo) / (BINS + 1), bw = SR / NFFT;
+  const filters = [];
+  for (let b = 0; b < BINS; b++) {
+    const l = lo + b * d, c = l + d, r = c + d, w = new Float32Array(NFFT / 2);
+    let start = -1, end = -1;
+    for (let i = 0; i < NFFT / 2; i++) {
+      const m = mel(i * bw);
+      if (m > l && m < r) { w[i] = m <= c ? (m - l) / (c - l) : (r - m) / (r - c); if (start < 0) start = i; end = i; }
+    }
+    filters.push({ w, start, end });
   }
-  function angleFor(v) { const c = Math.min(MAX, Math.max(MIN, v)); return -90 + (c - MIN) / (MAX - MIN) * 180; }
-
-  // Storage (per-device, optional)
-  const load = () => { try { return JSON.parse(localStorage.getItem('qdy') || 'null'); } catch (e) { return null; } };
-  const save = () => { try { localStorage.setItem('qdy', JSON.stringify(state)); } catch (e) {} };
-  const state = load() || { threshold: 75, players: [{ name: 'Anyone', peak: 0, alarms: 0 }], current: 0 };
-
-  const thr = $('thr');
-  thr.value = state.threshold;
-  function setThr() {
-    state.threshold = +thr.value; $('thrVal').textContent = thr.value;
-    $('thrMark').style.transform = `rotate(${angleFor(state.threshold)}deg)`;
-    $('thrMark').style.transformOrigin = '150px 150px';
-    save();
-  }
-  thr.addEventListener('input', setThr); setThr();
-
-  function renderPlayers() {
-    const sel = $('player');
-    sel.innerHTML = state.players.map((p, i) => `<option value="${i}">${esc(p.name)}</option>`).join('');
-    sel.value = state.current;
-    const ranked = state.players.filter(p => p.peak > 0).sort((a, b) => b.peak - a.peak);
-    $('board').innerHTML = ranked.length
-      ? ranked.map((p, i) => `<li><span>${i === 0 ? '<span class="crown">👑</span>' : ''}${esc(p.name)} <span style="opacity:.6;font-weight:600">(${p.alarms} yelled at)</span></span><span class="score">${p.peak} dB</span></li>`).join('')
-      : '<li class="empty">No champions yet. Somebody make some noise.</li>';
-  }
-  const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  $('player').addEventListener('change', e => { state.current = +e.target.value; save(); });
-  $('addBtn').addEventListener('click', addPlayer);
-  $('newName').addEventListener('keydown', e => { if (e.key === 'Enter') addPlayer(); });
-  function addPlayer() {
-    const n = $('newName').value.trim(); if (!n) return;
-    state.players.push({ name: n, peak: 0, alarms: 0 }); state.current = state.players.length - 1;
-    $('newName').value = ''; save(); renderPlayers();
-  }
-  $('resetPeak').addEventListener('click', () => { state.players.forEach(p => { p.peak = 0; p.alarms = 0; }); save(); renderPlayers(); });
-  renderPlayers();
-
-  // Audio
-  let ctx, analyser, buf, stream, running = false, smooth = MIN, alarmOn = false, cooldownUntil = 0, aboveSince = 0;
-  const shouts = ['QUIET<br>DOWN<br>YOU!', 'SHHHHH!', 'INDOOR<br>VOICE!', 'QUIET<br>DOWN<br>YOU!'];
-
-  $('startBtn').addEventListener('click', () => running ? stop() : startListening());
-  $('gateBtn').addEventListener('click', () => startListening(true));
-
-  async function startListening(fromGate) {
-    if (running) return;
-    try {
-      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
-      await ctx.resume();
-      stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
-      const src = ctx.createMediaStreamSource(stream);
-      analyser = ctx.createAnalyser(); analyser.fftSize = 2048;
-      buf = new Float32Array(analyser.fftSize);
-      src.connect(analyser);
-      // Unlock speech on iOS with a silent utterance during the tap
-      if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); }
-      running = true; $('err').style.display = 'none';
-      document.body.classList.remove('needs-mic');
-      $('startBtn').textContent = 'Stop listening';
-      tick();
-    } catch (e) {
-      const msg = !window.isSecureContext
-        ? 'The microphone only works when the app is opened from an https:// address. Host the folder online (see the readme) and open it from there.'
-        : 'Microphone is blocked. Open your phone\'s Settings, find this app or your browser, turn Microphone on, then tap the button again.';
-      const box = fromGate ? $('gateErr') : $('err');
-      box.textContent = msg; box.style.display = 'block';
+  // Radix-2 FFT tables
+  const rev = new Uint32Array(NFFT), cos = new Float32Array(NFFT / 2), sin = new Float32Array(NFFT / 2);
+  for (let i = 0, bits = Math.log2(NFFT); i < NFFT; i++) { let r = 0; for (let j = 0; j < bits; j++) r |= ((i >> j) & 1) << (bits - 1 - j); rev[i] = r; }
+  for (let i = 0; i < NFFT / 2; i++) { cos[i] = Math.cos(2 * Math.PI * i / NFFT); sin[i] = -Math.sin(2 * Math.PI * i / NFFT); }
+  const re = new Float64Array(NFFT), im = new Float64Array(NFFT), frame = new Float64Array(WIN);
+  function fft() {
+    for (let i = 0; i < NFFT; i++) { const j = rev[i]; if (j > i) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+    for (let size = 2; size <= NFFT; size <<= 1) {
+      const half = size >> 1, step = NFFT / size;
+      for (let s = 0; s < NFFT; s += size) for (let k = 0; k < half; k++) {
+        const a = s + k, b = a + half, wr = cos[k * step], wi = sin[k * step];
+        const tr = re[b] * wr - im[b] * wi, ti = re[b] * wi + im[b] * wr;
+        re[b] = re[a] - tr; im[b] = im[a] - ti; re[a] += tr; im[a] += ti;
+      }
     }
   }
+  function compute(x) {
+    const T = x.length < WIN ? 0 : 1 + Math.floor((x.length - WIN) / HOP);
+    const out = new Float32Array(T * BINS), mean = new Float64Array(BINS);
+    for (let t = 0; t < T; t++) {
+      let m = 0;
+      for (let i = 0; i < WIN; i++) { frame[i] = x[t * HOP + i] * 32768; m += frame[i]; }
+      m /= WIN;
+      for (let i = 0; i < WIN; i++) frame[i] -= m;
+      for (let i = WIN - 1; i > 0; i--) frame[i] -= 0.97 * frame[i - 1];
+      frame[0] -= 0.97 * frame[0];
+      for (let i = 0; i < NFFT; i++) { re[i] = i < WIN ? frame[i] * win[i] : 0; im[i] = 0; }
+      fft();
+      for (let b = 0; b < BINS; b++) {
+        const { w, start, end } = filters[b]; let e = 0;
+        for (let i = start; i <= end; i++) e += w[i] * (re[i] * re[i] + im[i] * im[i]);
+        const v = Math.log(Math.max(e, EPS)); out[t * BINS + b] = v; mean[b] += v;
+      }
+    }
+    for (let b = 0; b < BINS; b++) mean[b] /= T || 1;
+    for (let t = 0; t < T; t++) for (let b = 0; b < BINS; b++) out[t * BINS + b] -= mean[b];
+    return { data: out, frames: T };
+  }
+  return { compute, BINS };
+})();
 
-  // Ask for the mic on first launch; skip the screen if it's already allowed
-  (async () => {
-    let granted = false;
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const MIN = 30, MAX = 110, CAL = 94;
+  const MP = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-audio@1.0.1';
+  const YAMNET = 'https://storage.googleapis.com/mediapipe-models/audio_classifier/yamnet/float32/1/yamnet.tflite';
+  const ORT = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist';
+  const STRICT = { relaxed: 0.35, normal: 0.45, strict: 0.55 };
+
+  const VOICE = new Set(['Speech', 'Child speech, kid speaking', 'Conversation', 'Narration, monologue', 'Babbling', 'Shout', 'Bellow', 'Whoop', 'Yell', 'Children shouting', 'Screaming', 'Whispering', 'Laughter', 'Baby laughter', 'Giggle', 'Snicker', 'Belly laugh', 'Chuckle, chortle', 'Crying, sobbing', 'Baby cry, infant cry', 'Whimper', 'Wail, moan', 'Singing', 'Child singing', 'Yodeling', 'Chant', 'Rapping', 'Humming', 'Groan', 'Grunt', 'Male speech, man speaking', 'Female speech, woman speaking', 'Battle cry', 'Cheering', 'Chatter', 'Hubbub, speech noise, speech babble', 'Children playing', 'Sigh', 'Gasp']);
+  const PHONE = new Set(['Ringtone', 'Telephone', 'Telephone bell ringing', 'Telephone dialing, DTMF', 'Dial tone', 'Busy signal', 'Beep, bleep', 'Alarm clock', 'Buzzer', 'Chime', 'Ding', 'Ding-dong', 'Sine wave', 'Electronic tuner', 'Tuning fork', 'Jingle bell', 'Bell', 'Tubular bells', 'Wind chime', 'Glockenspiel', 'Marimba, xylophone', 'Vibraphone', 'Mallet percussion', 'Steelpan', 'Music', 'Musical instrument', 'Synthesizer', 'Electronic music', 'Video game music', 'Jingle (music)', 'Theme music', 'Tick', 'Tick-tock', 'Pulse', 'Chirp tone', 'Sidetone', 'Vibration', 'Buzz', 'Speech synthesizer', 'Synthetic singing', 'Alarm', 'Reversing beeps', 'White noise', 'Pink noise']);
+  const AMBIENT = new Set(['Silence', 'Inside, small room', 'Inside, large room or hall', 'Inside, public space', 'Outside, urban or manmade', 'Outside, rural or natural', 'Noise', 'Static', 'Hum', 'Echo', 'Environmental noise', 'Mains hum', 'Field recording', 'Reverberation']);
+  const FRIENDLY = { 'Slam': 'Door slam', 'Knock': 'Knocking', 'Thump, thud': 'Thud', 'Bark': 'Dog barking', 'Bow-wow': 'Dog barking', 'Dishes, pots, and pans': 'Pots & pans', 'Smash, crash': 'Crash', 'Shatter': 'Smash', 'Cupboard open or close': 'Cupboard', 'Drawer open or close': 'Drawer', 'Burping, eructation': 'Burp', 'Television': 'TV', 'Speech': 'Talking', 'Shout': 'Shouting', 'Yell': 'Yelling', 'Children shouting': 'Shouting', 'Laughter': 'Laughing', 'Belly laugh': 'Laughing', 'Giggle': 'Giggling', 'Whoop': 'Whooping', 'Crying, sobbing': 'Crying', 'Beep, bleep': 'Beep', 'Telephone bell ringing': 'Phone ringing' };
+  const nice = n => FRIENDLY[n] || String(n || 'Mystery noise').split(',')[0].replace(/\s*\(.*\)/, '');
+
+  const PROMPTS = [
+    { how: 'Talk normally', say: n => `Hi, I'm ${n}, and this is my normal voice.` },
+    { how: 'Read this out', say: () => 'The quick brown fox jumps over the lazy dog, then asks for snacks.' },
+    { how: 'High, squeaky voice', say: () => "Woooo! Wheee! I'm a tiny excited mouse!" },
+    { how: 'Deep, low voice', say: () => 'Ho ho ho. I am a big grumpy giant.' },
+    { how: 'Shout it!', say: () => "HEY! That's not fair! Give it back!" },
+    { how: 'Call across the house', say: () => "Oi! Dinner's ready! Come doooown!" },
+    { how: 'Fast and excited', say: () => "Guess what, guess what! You'll never believe what just happened!" },
+    { how: 'Laugh for a few seconds', say: () => 'Ha ha ha ha ha! (any laugh counts)' },
+  ];
+
+  // ---------- state ----------
+  const uid = () => Math.random().toString(36).slice(2, 10);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const round = e => Array.from(e, v => Math.round(v * 1e4) / 1e4);
+  function loadState() {
+    try { const s = JSON.parse(localStorage.getItem('quiteyou.v2') || 'null'); if (s && s.players) return s; } catch (e) {}
+    const s = { settings: { threshold: 75, minMs: 400, voiceId: true, strict: 'normal', ignorePhone: true }, players: [], events: [], hotSeat: null, modelsCached: false };
     try {
-      const st = await navigator.permissions.query({ name: 'microphone' });
-      granted = st.state === 'granted';
+      const old = JSON.parse(localStorage.getItem('qdy') || 'null');
+      if (old) { s.settings.threshold = old.threshold || 75; (old.players || []).filter(p => p.name !== 'Anyone').forEach(p => s.players.push({ id: uid(), name: p.name, samples: [] })); }
     } catch (e) {}
-    if (!granted) document.body.classList.add('needs-mic');
+    return s;
+  }
+  const state = loadState();
+  const S = state.settings;
+  let saveTimer;
+  function save() { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem('quiteyou.v2', JSON.stringify(state)); } catch (e) { console.warn('save failed', e); } }, 150); }
+  const player = id => state.players.find(p => p.id === id);
+
+  // ---------- dial ----------
+  function angleFor(v) { const c = Math.min(MAX, Math.max(MIN, v)); return -90 + (c - MIN) / (MAX - MIN) * 180; }
+  (function drawTicks() {
+    let h = '';
+    for (let v = MIN; v <= MAX; v += 10) {
+      const a = angleFor(v) * Math.PI / 180, s = Math.sin(a), c = Math.cos(a);
+      h += `<line x1="${150 + s * 100}" y1="${150 - c * 100}" x2="${150 + s * 88}" y2="${150 - c * 88}" stroke="currentColor" stroke-width="2"/>` +
+        `<text x="${150 + s * 74}" y="${150 - c * 74 + 4}" font-size="11" font-family="Nunito, sans-serif" font-weight="800" text-anchor="middle" fill="currentColor">${v}</text>`;
+    }
+    $('ticks').innerHTML = h;
   })();
 
-  // Offline support + installability
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  // ---------- settings UI ----------
+  function bindSettings() {
+    const thr = $('thr'), mm = $('minMs');
+    thr.value = S.threshold; mm.value = S.minMs;
+    const upd = () => {
+      S.threshold = +thr.value; S.minMs = +mm.value;
+      $('thrVal').textContent = S.threshold; $('minMsVal').textContent = (S.minMs / 1000).toFixed(1) + 's';
+      $('thrMark').style.transform = `rotate(${angleFor(S.threshold)}deg)`; save();
+    };
+    thr.addEventListener('input', upd); mm.addEventListener('input', upd); upd();
+    $('ignorePhone').checked = S.ignorePhone; $('voiceId').checked = S.voiceId;
+    $('ignorePhone').addEventListener('change', e => { S.ignorePhone = e.target.checked; save(); });
+    $('voiceId').addEventListener('change', e => { S.voiceId = e.target.checked; save(); if (S.voiceId) loadModels(); });
+    document.querySelectorAll('input[name=strict]').forEach(r => { r.checked = r.value === S.strict; r.addEventListener('change', () => { S.strict = r.value; save(); }); });
+    $('hotSeat').addEventListener('change', e => { state.hotSeat = e.target.value || null; save(); });
+    $('resetBtn').addEventListener('click', () => { if (confirm('Clear all scores and the noise history? Voice profiles are kept.')) { state.events = []; save(); render(); } });
+    $('addBtn').addEventListener('click', addPlayer);
+    $('newName').addEventListener('keydown', e => { if (e.key === 'Enter') addPlayer(); });
   }
-  const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  let deferredPrompt = null;
-  if (!standalone) {
-    if (isIOS) {
-      $('installText').innerHTML = 'To add Quite You to your home screen: tap the <b>Share</b> button in Safari, then <b>Add to Home Screen</b>.';
-      $('install').classList.add('show');
+  function addPlayer() {
+    const n = $('newName').value.trim(); if (!n) return;
+    state.players.push({ id: uid(), name: n, samples: [] });
+    $('newName').value = ''; save(); render();
+  }
+
+  // ---------- rendering ----------
+  const timeStr = t => new Date(t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const pct = s => Math.round(Math.max(0, Math.min(1, (s - 0.2) / 0.6)) * 100);
+  function scores() {
+    const m = new Map(state.players.map(p => [p.id, { p, points: 0, peak: 0 }]));
+    for (const e of state.events) if (e.pid && m.has(e.pid)) { const s = m.get(e.pid); s.points++; s.peak = Math.max(s.peak, e.db); }
+    return [...m.values()].sort((a, b) => b.points - a.points || b.peak - a.peak);
+  }
+  function evLine(e) {
+    const p = player(e.pid);
+    const icon = e.kind === 'voice' ? '🗣️' : '💥';
+    const what = e.kind === 'voice' ? nice(e.label) : nice(e.label) + '?';
+    return { p, icon, what };
+  }
+  function render() {
+    // hot seat
+    $('hotSeat').innerHTML = '<option value="">Nobody</option>' + state.players.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+    $('hotSeat').value = player(state.hotSeat) ? state.hotSeat : '';
+    // players
+    $('players').innerHTML = state.players.length ? state.players.map(p => {
+      const n = p.samples.length;
+      return `<li><span class="grow">${esc(p.name)}<span class="meta">${n ? `🎙️ Voice profile · ${n} samples` : 'No voice profile yet'}</span></span>
+        <button class="secondary small" data-rec="${p.id}">${n ? 'Redo voice' : 'Record voice'}</button>
+        <button class="secondary small danger" data-del="${p.id}" aria-label="Remove ${esc(p.name)}">✕</button></li>`;
+    }).join('') : '<li class="empty">Add everyone in the family below.</li>';
+    // scoreboard
+    const sc = scores().filter(s => s.points > 0);
+    $('board').innerHTML = sc.length ? sc.map((s, i) => `<li><span class="grow who">${i === 0 ? '👑 ' : ''}${esc(s.p.name)}<span class="meta">loudest: ${s.peak} dB</span></span><span class="score">${s.points} ${s.points === 1 ? 'bust' : 'busts'}</span></li>`).join('')
+      : '<li class="empty">No champions yet. Somebody make some noise.</li>';
+    // mystery
+    const myst = state.events.filter(e => !e.pid).slice(-10).reverse();
+    $('mysteryPanel').hidden = !myst.length;
+    $('mysteryCount').textContent = myst.length;
+    $('mystery').innerHTML = myst.map(e => { const l = evLine(e); return `<li class="ev mystery" data-ev="${e.id}"><span class="grow">${l.icon} ${esc(e.kind === 'voice' ? 'Someone ' + l.what.toLowerCase() : l.what)}<span class="meta">${timeStr(e.t)} · ${e.db} dB</span></span><button class="small">Who?</button></li>`; }).join('');
+    // history
+    const hist = state.events.slice(-8).reverse();
+    $('history').innerHTML = hist.length ? hist.map(e => { const l = evLine(e); return `<li class="ev" data-ev="${e.id}"><span class="grow">${l.icon} ${esc(l.what)}<span class="meta">${timeStr(e.t)} · ${e.db} dB${e.how === 'voice' && e.conf != null ? ` · ${pct(e.conf)}% sure` : ''}</span></span>${l.p ? `<span class="tag">${esc(l.p.name)}</span>` : '<span class="tag alert">Who?</span>'}</li>`; }).join('')
+      : '<li class="empty">Nothing yet.</li>';
+    renderLast();
+  }
+  function renderLast() {
+    const e = state.events[state.events.length - 1];
+    const box = $('last');
+    if (!e || Date.now() - e.t > 30 * 60 * 1000) { box.classList.remove('show'); return; }
+    const l = evLine(e);
+    let big, meta = `${nice(e.label)} · ${e.db} dB`, btn;
+    if (l.p) { big = `Busted: ${esc(l.p.name)}`; if (e.how === 'voice' && e.conf != null) meta += ` · ${pct(e.conf)}% sure`; if (e.how === 'hotseat') meta += ' · hot seat'; btn = 'Wrong person?'; }
+    else if (e.kind === 'voice') { big = 'Someone got loud'; btn = 'Who was it?'; }
+    else { big = `Mystery: ${esc(nice(e.label))}?`; meta = `${e.db} dB · ${timeStr(e.t)}`; btn = 'Who did it?'; }
+    box.innerHTML = `<div class="step">Last noise</div><div class="big">${big}</div><div class="meta">${esc(meta)}</div><div class="row"><button class="secondary small" data-ev="${e.id}">${btn}</button></div>`;
+    box.classList.add('show');
+  }
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-rec],[data-del],[data-ev]');
+    if (!t) return;
+    if (t.dataset.rec) openEnroll(t.dataset.rec);
+    else if (t.dataset.del) {
+      const p = player(t.dataset.del);
+      if (p && confirm(`Remove ${p.name}? Their voice profile and points will be deleted.`)) {
+        state.players = state.players.filter(x => x !== p);
+        state.events = state.events.filter(ev => ev.pid !== p.id);
+        if (state.hotSeat === p.id) state.hotSeat = null;
+        save(); render();
+      }
+    } else if (t.dataset.ev) openAssign(t.dataset.ev);
+  });
+
+  // ---------- assign / correct ----------
+  let assignId = null;
+  function openAssign(id) {
+    const e = state.events.find(x => x.id === id); if (!e) return;
+    assignId = id;
+    const l = evLine(e);
+    const canLearn = e.kind === 'voice' && e.emb;
+    $('assignBody').innerHTML = `<h2>Who made that noise?</h2>
+      <p>${l.icon} ${esc(l.what)} · ${e.db} dB · ${timeStr(e.t)}${l.p ? `<br>Currently blamed: <b>${esc(l.p.name)}</b>` : ''}</p>
+      <div class="chips">${state.players.map(p => `<button class="${p.id === e.pid ? 'on' : ''}" data-assign="${p.id}">${esc(p.name)}</button>`).join('') || '<span class="empty">Add players first.</span>'}</div>
+      ${canLearn ? '<p class="hint">Picking someone also teaches the app their voice.</p>' : ''}
+      <div class="btnrow"><button class="secondary danger" data-assign="__none">Didn't count — remove it</button></div>`;
+    $('assign').classList.add('open'); document.body.classList.add('locked');
+  }
+  function closeAssign() { $('assign').classList.remove('open'); document.body.classList.remove('locked'); assignId = null; }
+  $('assignClose').addEventListener('click', closeAssign);
+  $('assignBody').addEventListener('click', ev => {
+    const b = ev.target.closest('[data-assign]'); if (!b) return;
+    const e = state.events.find(x => x.id === assignId); if (!e) return closeAssign();
+    if (b.dataset.assign === '__none') { state.events = state.events.filter(x => x !== e); }
+    else {
+      const p = player(b.dataset.assign);
+      const was = e.pid;
+      e.pid = p.id; e.how = 'manual';
+      // Learn from corrections: add this clip to the right person's profile
+      if (e.kind === 'voice' && e.emb && was !== p.id && p.samples.length) {
+        p.samples.push({ e: e.emb, src: 'fix' });
+        const fixes = p.samples.filter(s => s.src === 'fix');
+        if (fixes.length > 20) p.samples.splice(p.samples.indexOf(fixes[0]), 1);
+      }
     }
-    window.addEventListener('beforeinstallprompt', e => {
-      e.preventDefault(); deferredPrompt = e;
-      $('installBtn').hidden = false; $('install').classList.add('show');
-    });
-    $('installBtn').addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null;
-      $('install').classList.remove('show');
-    });
-    window.addEventListener('appinstalled', () => $('install').classList.remove('show'));
-  }
+    save(); render(); closeAssign();
+  });
 
-  function stop() {
-    running = false; stream && stream.getTracks().forEach(t => t.stop());
-    $('startBtn').textContent = 'Start listening'; $('db').textContent = '--';
-    $('verdict').textContent = 'Paused';
-  }
+  // ---------- audio engine ----------
+  let ctx, stream, src, analyser, abuf, sp, mute, ring, ringPos = 0, audioOn = false;
+  let armed = false, enrolling = false, busy = false, smooth = MIN, shown = MIN;
+  let aboveSince = 0, evPeak = 0, cooldownUntil = 0;
 
-  function tick() {
-    if (!running) return;
-    analyser.getFloatTimeDomainData(buf);
-    let sum = 0; for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
-    const rms = Math.sqrt(sum / buf.length);
-    const db = Math.max(MIN, 20 * Math.log10(rms || 1e-8) + CAL);
+  async function ensureAudio() {
+    if (audioOn) { await ctx.resume(); return; }
+    ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+    await ctx.resume();
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    src = ctx.createMediaStreamSource(stream);
+    analyser = ctx.createAnalyser(); analyser.fftSize = 2048; abuf = new Float32Array(analyser.fftSize);
+    src.connect(analyser);
+    ring = new Float32Array(Math.round(ctx.sampleRate * 6)); ringPos = 0;
+    sp = ctx.createScriptProcessor(2048, 1, 1);
+    mute = ctx.createGain(); mute.gain.value = 0;
+    sp.onaudioprocess = e => { const d = e.inputBuffer.getChannelData(0), n = ring.length; for (let i = 0; i < d.length; i++) { ring[ringPos] = d[i]; ringPos = ringPos + 1 === n ? 0 : ringPos + 1; } };
+    src.connect(sp); sp.connect(mute); mute.connect(ctx.destination);
+    if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); }
+    audioOn = true; document.body.classList.remove('needs-mic');
+    requestAnimationFrame(loop);
+  }
+  function stopAudio() {
+    if (!audioOn) return;
+    audioOn = false;
+    try { src.disconnect(); sp.disconnect(); mute.disconnect(); } catch (e) {}
+    stream && stream.getTracks().forEach(t => t.stop());
+    $('db').textContent = '--'; $('dimDb').textContent = '--';
+  }
+  function getClip(sec) {
+    const n = Math.min(ring.length, Math.round(sec * ctx.sampleRate)), out = new Float32Array(n);
+    let s = (ringPos - n + ring.length) % ring.length;
+    for (let i = 0; i < n; i++) { out[i] = ring[s]; s = s + 1 === ring.length ? 0 : s + 1; }
+    return out;
+  }
+  const setVerdict = t => { $('verdict').textContent = t; };
+
+  function loop() {
+    if (!audioOn) return;
+    analyser.getFloatTimeDomainData(abuf);
+    let sum = 0; for (let i = 0; i < abuf.length; i++) sum += abuf[i] * abuf[i];
+    const db = Math.max(MIN, 20 * Math.log10(Math.sqrt(sum / abuf.length) || 1e-8) + CAL);
     smooth = db > smooth ? smooth * 0.6 + db * 0.4 : smooth * 0.92 + db * 0.08;
-    const shown = Math.round(smooth);
-
+    shown = Math.round(smooth);
     $('needle').style.transform = `rotate(${angleFor(smooth)}deg)`;
-    $('db').textContent = shown;
+    $('db').textContent = shown; $('dimDb').textContent = shown;
 
-    if (!alarmOn) {
-      const t = state.threshold;
-      $('verdict').textContent = shown >= t ? 'Uh oh…' : shown >= t - 10 ? 'Getting rowdy' : shown >= 50 ? 'Normal chatter' : 'Library quiet';
-      const p = state.players[state.current];
-      if (p && shown > p.peak) { p.peak = shown; renderPlayers(); save(); }
-
-      const now = performance.now();
-      if (shown >= t && now > cooldownUntil) {
-        if (!aboveSince) aboveSince = now;
-        if (now - aboveSince > 250) triggerAlarm();
-      } else aboveSince = 0;
+    if (enrolling) {
+      const m = $('enLevel'); if (m) m.style.width = Math.max(0, Math.min(100, (shown - 35) / 60 * 100)) + '%';
+    } else if (armed) {
+      const t = S.threshold, now = performance.now();
+      if (busy) { if (!document.body.classList.contains('alarm')) evPeak = Math.max(evPeak, shown); }
+      else {
+        if (now > cooldownUntil) setVerdict(shown >= t ? 'Uh oh…' : shown >= t - 10 ? 'Getting rowdy' : shown >= 50 ? 'Normal chatter' : 'Library quiet');
+        if (shown >= t && now > cooldownUntil) {
+          if (!aboveSince) aboveSince = now;
+          evPeak = Math.max(evPeak, shown);
+          if (now - aboveSince >= S.minMs) {
+            busy = true; aboveSince = 0;
+            setVerdict('Hmm… who was that?');
+            setTimeout(() => handleTrigger().catch(err => { console.error(err); endAlarm(); }), 450);
+          }
+        } else { aboveSince = 0; evPeak = 0; }
+      }
     }
-    requestAnimationFrame(tick);
+    requestAnimationFrame(loop);
   }
 
-  function triggerAlarm() {
-    alarmOn = true; aboveSince = 0;
-    const p = state.players[state.current]; if (p) { p.alarms++; save(); renderPlayers(); }
-    $('shoutText').innerHTML = shouts[Math.floor(Math.random() * shouts.length)];
-    document.body.classList.add('alarm');
-    $('verdict').textContent = 'BUSTED!';
-    if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 600]);
+  // ---------- sound smarts (models) ----------
+  const models = { cls: null, voice: null, cls_s: 'idle', voice_s: 'idle', started: false };
+  function loadScript(url) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = url; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
+  function updateStatus() {
+    const c = models.cls_s, v = models.voice_s;
+    let t = '';
+    if (!models.started) t = '';
+    else if (c === 'loading' || v === 'loading') t = '🧠 Loading sound smarts (first time only)…';
+    else if (c === 'ready' && v === 'ready') t = '🧠 Sound smarts ready';
+    else if (c === 'failed' && v === 'failed') t = '⚠️ Basic mode — sound smarts need internet the first time';
+    else t = c === 'ready' ? '🧠 Sound smarts ready · ⚠️ voice ID unavailable' : '🧠 Voice ID ready · ⚠️ noise sorting unavailable';
+    $('status').textContent = t;
+  }
+  async function loadModels() {
+    if (models.started) return models.promise;
+    models.started = true;
+    const p1 = (async () => {
+      models.cls_s = 'loading'; updateStatus();
+      try {
+        const mod = await import(MP + '/audio_bundle.mjs');
+        const files = await mod.FilesetResolver.forAudioTasks(MP + '/wasm');
+        models.cls = await mod.AudioClassifier.createFromOptions(files, { baseOptions: { modelAssetPath: YAMNET }, maxResults: 12, scoreThreshold: 0.02 });
+        models.cls_s = 'ready';
+      } catch (e) { console.error('classifier', e); models.cls_s = 'failed'; }
+      updateStatus();
+    })();
+    const p2 = (async () => {
+      models.voice_s = 'loading'; updateStatus();
+      try {
+        if (!window.ort) await loadScript(ORT + '/ort.wasm.min.js');
+        ort.env.wasm.wasmPaths = ORT + '/'; ort.env.wasm.numThreads = 1;
+        models.voice = await ort.InferenceSession.create('voice-model.onnx', { executionProviders: ['wasm'] });
+        models.voice_s = 'ready';
+      } catch (e) { console.error('voice', e); models.voice_s = 'failed'; }
+      updateStatus();
+    })();
+    models.promise = Promise.all([p1, p2]).then(() => { if (models.cls || models.voice) { state.modelsCached = true; save(); } });
+    return models.promise;
+  }
 
-    // Siren
+  function classifyClip(clip, sr) {
+    const agg = {};
+    for (const r of models.cls.classify(clip, sr)) for (const c of ((r.classifications && r.classifications[0] && r.classifications[0].categories) || [])) {
+      const n = c.categoryName || c.displayName; agg[n] = Math.max(agg[n] || 0, c.score);
+    }
+    let voice = 0, vTop = 'Speech', phone = 0, pTop = '', other = 0, oTop = '';
+    for (const [n, s] of Object.entries(agg)) {
+      if (VOICE.has(n)) { if (s > voice) { voice = s; vTop = n; } }
+      else if (PHONE.has(n)) { if (s > phone) { phone = s; pTop = n; } }
+      else if (!AMBIENT.has(n) && s > other) { other = s; oTop = n; }
+    }
+    if (voice >= 0.3 && voice >= phone * 0.8) return { kind: 'voice', label: vTop };
+    if (phone >= 0.25 && phone > voice) return { kind: 'phone', label: nice(pTop) };
+    if (voice >= 0.15 && voice >= other) return { kind: 'voice', label: vTop };
+    if (other > 0) return { kind: 'noise', label: oTop };
+    if (phone > 0) return { kind: 'phone', label: nice(pTop) };
+    return { kind: 'noise', label: 'Mystery noise' };
+  }
+
+  async function resample16(x, sr) {
+    if (sr === 16000) return x;
+    const oc = new OfflineAudioContext(1, Math.ceil(x.length * 16000 / sr), 16000);
+    const b = oc.createBuffer(1, x.length, sr); b.copyToChannel(x, 0);
+    const s = oc.createBufferSource(); s.buffer = b; s.connect(oc.destination); s.start();
+    return (await oc.startRendering()).getChannelData(0);
+  }
+  // Keep only the loud/voiced parts of a clip
+  function trimVoiced(x, sr, minDb) {
+    const F = Math.round(sr * 0.02), n = Math.floor(x.length / F), dbs = new Float32Array(n);
+    for (let f = 0; f < n; f++) { let s = 0; for (let i = f * F; i < (f + 1) * F; i++) s += x[i] * x[i]; dbs[f] = 20 * Math.log10(Math.sqrt(s / F) || 1e-8) + CAL; }
+    const sorted = Array.from(dbs).sort((a, b) => a - b), floor = sorted[Math.floor(n * 0.2)] || MIN;
+    const thr = Math.max(floor + 8, minDb), keep = new Uint8Array(n);
+    for (let f = 0; f < n; f++) if (dbs[f] >= thr) for (let k = Math.max(0, f - 8); k <= Math.min(n - 1, f + 8); k++) keep[k] = 1;
+    let cnt = 0; for (let f = 0; f < n; f++) cnt += keep[f];
+    const out = new Float32Array(cnt * F); let o = 0;
+    for (let f = 0; f < n; f++) if (keep[f]) { out.set(x.subarray(f * F, (f + 1) * F), o); o += F; }
+    let voiced = 0; for (let f = 0; f < n; f++) if (dbs[f] >= thr) voiced++;
+    return { audio: out, voicedSec: voiced * 0.02, keptSec: cnt * 0.02 };
+  }
+  async function embed(x, sr) {
+    if (!models.voice) return null;
+    const x16 = await resample16(x, sr);
+    const fb = Fbank.compute(x16);
+    if (fb.frames < 60) return null;
+    const out = await models.voice.run({ feats: new ort.Tensor('float32', fb.data, [1, fb.frames, 80]) });
+    const e = out[Object.keys(out)[0]].data;
+    let n = 0; for (const v of e) n += v * v; n = Math.sqrt(n) || 1;
+    return Float32Array.from(e, v => v / n);
+  }
+  function match(emb) {
+    const res = state.players.filter(p => p.samples.length).map(p => {
+      const sims = p.samples.map(s => { let d = 0; for (let i = 0; i < emb.length; i++) d += emb[i] * s.e[i]; return d; }).sort((a, b) => b - a);
+      const top = sims.slice(0, 3);
+      return { p, score: top.reduce((a, b) => a + b, 0) / top.length };
+    }).sort((a, b) => b.score - a.score);
+    const best = res[0], second = res[1];
+    const ok = !!best && best.score >= STRICT[S.strict] && (!second || best.score - second.score >= 0.05);
+    return { ok, best, all: res };
+  }
+
+  // ---------- alarm ----------
+  function siren() {
     const t0 = ctx.currentTime, dur = 1.8;
     const osc = ctx.createOscillator(), osc2 = ctx.createOscillator(), g = ctx.createGain();
     osc.type = 'sawtooth'; osc2.type = 'square';
@@ -354,25 +710,229 @@
     g.gain.setValueAtTime(1, t0); g.gain.setValueAtTime(1, t0 + dur - 0.05); g.gain.linearRampToValueAtTime(0, t0 + dur);
     osc.connect(g); osc2.connect(g); g.connect(ctx.destination);
     osc.start(t0); osc2.start(t0); osc.stop(t0 + dur); osc2.stop(t0 + dur);
-
-    setTimeout(() => {
-      if ('speechSynthesis' in window) {
-        speechSynthesis.cancel();
-        const name = p && p.name !== 'Anyone' ? `, ${p.name}` : '';
-        const u = new SpeechSynthesisUtterance(`QUIET DOWN YOU${name}!`);
-        u.volume = 1; u.rate = 0.85; u.pitch = 0.5;
-        u.onend = endAlarm; u.onerror = endAlarm;
-        speechSynthesis.speak(u);
-        setTimeout(endAlarm, 4000);
-      } else endAlarm();
-    }, dur * 1000);
+    return new Promise(r => setTimeout(r, dur * 1000));
   }
+  function speak(text) {
+    return new Promise(res => {
+      if (!('speechSynthesis' in window)) return res();
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text); u.volume = 1; u.rate = 0.85; u.pitch = 0.5;
+      let done = false; const fin = () => { if (!done) { done = true; res(); } };
+      u.onend = fin; u.onerror = fin; speechSynthesis.speak(u); setTimeout(fin, 4500);
+    });
+  }
+  function shout(big, small) { $('shoutText').innerHTML = big; $('shoutName').textContent = small || ''; document.body.classList.add('alarm'); }
 
+  async function handleTrigger() {
+    const sr = ctx.sampleRate, clip = getClip(3), peak = evPeak || shown;
+    evPeak = 0;
+    let cls = { kind: 'unknown', label: 'Loud noise' };
+    if (models.cls) { try { cls = classifyClip(clip, sr); } catch (e) { console.error(e); } }
+    if (cls.kind === 'phone' && S.ignorePhone) {
+      setVerdict(`Ignored a phone sound (${cls.label})`);
+      busy = false; cooldownUntil = performance.now() + 1500; return;
+    }
+    if (cls.kind === 'phone') cls.kind = 'noise';
+    if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 600]);
+    shout(['SHHHHH!', 'OI!', 'HEY!'][Math.floor(Math.random() * 3)], '');
+    const sirenDone = siren();
+
+    let pid = null, conf = null, emb = null, how = '';
+    const kind = cls.kind === 'noise' ? 'noise' : 'voice';
+    if (kind === 'voice') {
+      const profiled = state.players.some(p => p.samples.length);
+      if (S.voiceId && models.voice && profiled) {
+        const t = trimVoiced(clip, sr, S.threshold - 18);
+        if (t.voicedSec >= 0.4) { try { emb = await embed(t.audio.length ? t.audio : clip, sr); } catch (e) { console.error(e); } }
+        if (emb) { const m = match(emb); conf = m.best ? m.best.score : null; if (m.ok) { pid = m.best.p.id; how = 'voice'; } }
+      } else if (player(state.hotSeat)) { pid = state.hotSeat; how = 'hotseat'; }
+    }
+    const ev = { id: uid(), t: Date.now(), kind, label: cls.label, db: peak, pid, conf: conf != null ? Math.round(conf * 1000) / 1000 : null, how };
+    if (emb) ev.emb = round(emb);
+    state.events.push(ev);
+    let withEmb = 0;
+    for (let i = state.events.length - 1; i >= 0; i--) if (state.events[i].emb && ++withEmb > 20) delete state.events[i].emb;
+    if (state.events.length > 500) state.events.splice(0, state.events.length - 500);
+    save(); render();
+
+    const p = player(pid); let line;
+    if (kind === 'voice' && p) { shout('QUIET<br>DOWN<br>YOU!', p.name.toUpperCase()); line = `Quiet down you, ${p.name}!`; }
+    else if (kind === 'voice') { shout('QUIET<br>DOWN!', 'SOMEONE…'); line = 'Someone! Quiet down!'; }
+    else { shout('WHO DID<br>THAT?!', nice(cls.label).toUpperCase() + '?'); line = 'Who did that?!'; }
+    await sirenDone; await speak(line); endAlarm();
+  }
   function endAlarm() {
-    if (!alarmOn) return;
-    alarmOn = false; document.body.classList.remove('alarm');
-    smooth = MIN; cooldownUntil = performance.now() + 2500; // don't trigger on its own echo
+    document.body.classList.remove('alarm');
+    busy = false; smooth = MIN; evPeak = 0; aboveSince = 0;
+    cooldownUntil = performance.now() + 2500;
+    setVerdict('Listening…');
   }
+
+  // ---------- start / stop / wake lock ----------
+  let wakeLock = null;
+  async function keepAwake(on) {
+    try {
+      if (on && 'wakeLock' in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); }
+      else if (!on && wakeLock) { await wakeLock.release(); wakeLock = null; }
+    } catch (e) {}
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') { if (armed) keepAwake(true); if (ctx) ctx.resume(); if (audioOn) requestAnimationFrame(loop); }
+  });
+  function micError(box) {
+    box.textContent = !window.isSecureContext
+      ? 'The microphone only works when the app is opened from an https:// address.'
+      : "Microphone is blocked. Open your phone's Settings, find your browser or this app, turn Microphone on, then try again.";
+    box.style.display = 'block';
+  }
+  async function arm(fromGate) {
+    try { await ensureAudio(); }
+    catch (e) { micError(fromGate ? $('gateErr') : $('err')); return; }
+    $('err').style.display = 'none';
+    armed = true; cooldownUntil = performance.now() + 1000;
+    $('startBtn').textContent = 'Stop listening'; setVerdict('Listening…');
+    keepAwake(true); loadModels();
+  }
+  function disarm() {
+    armed = false; keepAwake(false);
+    $('startBtn').textContent = 'Start listening'; setVerdict('Paused');
+    document.body.classList.remove('dimmed');
+    if (!enrolling) stopAudio();
+  }
+  $('startBtn').addEventListener('click', () => armed ? disarm() : arm());
+  $('gateBtn').addEventListener('click', () => arm(true));
+  $('dimBtn').addEventListener('click', () => { if (!armed) { setVerdict('Start listening first, then dim'); return; } document.body.classList.add('dimmed'); });
+  $('dim').addEventListener('click', () => document.body.classList.remove('dimmed'));
+
+  // ---------- voice profile recording ----------
+  let en = null;
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  async function openEnroll(pid) {
+    const p = player(pid); if (!p) return;
+    en = { p, step: -1, phase: 'intro', samples: [], all: [], test: null };
+    enrolling = true;
+    $('enroll').classList.add('open'); document.body.classList.add('locked');
+    renderEnroll();
+    loadModels().then(renderEnroll);
+    try { await ensureAudio(); } catch (e) { if (en) { en.phase = 'micerr'; renderEnroll(); } }
+  }
+  function closeEnroll() {
+    en = null; enrolling = false;
+    $('enroll').classList.remove('open'); document.body.classList.remove('locked');
+    if (!armed) stopAudio();
+    cooldownUntil = performance.now() + 1500;
+    render();
+  }
+  $('enrollClose').addEventListener('click', closeEnroll);
+  function renderEnroll() {
+    if (!en) return;
+    const b = $('enrollBody'), p = en.p, total = PROMPTS.length;
+    const meter = rec => `<div class="meter${rec ? ' rec' : ''}"><i id="enLevel"></i></div>`;
+    const prog = `<div class="progress"><i style="width:${Math.max(0, en.step) / total * 100}%"></i></div>`;
+    if (en.phase === 'micerr') { b.innerHTML = '<h2>No microphone</h2><div class="err" style="display:block" id="enErr"></div>'; micError($('enErr')); return; }
+    if (models.voice_s === 'failed') { b.innerHTML = '<h2>Voice ID unavailable</h2><p>The voice model couldn\'t load. Check your internet connection, then close this and try again.</p>'; return; }
+    if (en.phase === 'intro') {
+      const ready = !!models.voice;
+      b.innerHTML = `<h2>${esc(p.name)}'s voice profile</h2>
+        <p>You'll say ${total} short things in different voices — normal, squeaky, deep, shouting and laughing — so the app knows ${esc(p.name)} however they sound. Takes about a minute.</p>
+        <p class="hint">Hold the phone about an arm's length away, like where it'll sit during games. Only ${esc(p.name)} should talk.</p>
+        ${meter(false)}
+        <button id="enGo" ${ready ? '' : 'disabled'}>${ready ? "Let's go" : 'Loading voice smarts…'}</button>`;
+    } else if (en.phase === 'test' || en.phase === 'testing' || en.phase === 'tested') {
+      let res = '';
+      if (en.test) {
+        const m = en.test;
+        const who = m.ok ? `I think that's <b>${esc(m.best.p.name)}</b>` : 'Hmm, not sure who that was';
+        res = `<p>${who}</p><div class="bars">${m.all.map(r => `<div><span>${esc(r.p.name)}</span><b><i style="width:${pct(r.score)}%"></i></b><span>${pct(r.score)}%</span></div>`).join('')}</div>`;
+        if (m.ok && m.best.p !== p) res += `<p class="hint">It picked the wrong person. "Add as extra sample" will help.</p>`;
+      }
+      b.innerHTML = `<div class="step">All recorded ✓</div><h2>Test it</h2>
+        <p>${en.phase === 'testing' ? 'Listening… say anything!' : `Tap test and have ${esc(p.name)} say anything, in any voice.`}</p>
+        ${meter(en.phase === 'testing')}${res}
+        <div class="btnrow">
+          <button id="enTest" ${en.phase === 'testing' ? 'disabled' : ''}>${en.test ? 'Test again' : 'Test'}</button>
+          ${en.test && en.test.emb ? '<button class="secondary" id="enAdd">Add as extra sample</button>' : ''}
+          <button class="secondary" id="enDone">Done</button>
+        </div>`;
+    } else {
+      const pr = PROMPTS[en.step];
+      let action = '';
+      if (en.phase === 'ready' || en.phase === 'retry') action = `${en.phase === 'retry' ? `<p class="err" style="display:block">${esc(en.msg || "Didn't hear enough. Try again, a bit louder.")}</p>` : ''}<button id="enRec">Record</button>`;
+      else if (en.phase === 'count') action = `<div class="count">${en.count}</div>`;
+      else if (en.phase === 'rec') action = '<div class="count">🔴</div><p>Recording…</p>';
+      else if (en.phase === 'proc') action = '<p>Got it, learning…</p>';
+      b.innerHTML = `<div class="step">Step ${en.step + 1} of ${total}</div>${prog}
+        <div class="prompt">${esc(pr.how)}</div>
+        <div class="quote">"${esc(pr.say(p.name))}"</div>
+        ${meter(en.phase === 'rec')}${action}`;
+    }
+  }
+  $('enrollBody').addEventListener('click', async e => {
+    if (!en) return;
+    const id = e.target.id;
+    if (id === 'enGo') { en.step = 0; en.phase = 'ready'; renderEnroll(); }
+    else if (id === 'enRec') recordStep();
+    else if (id === 'enTest') testStep();
+    else if (id === 'enAdd' && en.test && en.test.emb) { en.p.samples.push({ e: round(en.test.emb), src: 'enroll' }); en.test.emb = null; save(); renderEnroll(); }
+    else if (id === 'enDone') closeEnroll();
+  });
+  async function capture(secs) {
+    for (const n of [3, 2, 1]) { en.count = n; en.phase = 'count'; renderEnroll(); await sleep(750); if (!en) return null; }
+    en.phase = 'rec'; renderEnroll();
+    await sleep(secs * 1000); if (!en) return null;
+    return getClip(secs + 0.2);
+  }
+  async function recordStep() {
+    const my = en, clip = await capture(4); if (!clip || en !== my) return;
+    en.phase = 'proc'; renderEnroll();
+    const sr = ctx.sampleRate, t = trimVoiced(clip, sr, 42);
+    if (t.voicedSec < 1.0) { en.phase = 'retry'; en.msg = "Didn't hear enough. Try again, a bit louder."; renderEnroll(); return; }
+    let emb = null; try { emb = await embed(t.audio, sr); } catch (err) { console.error(err); }
+    if (!emb || en !== my) { if (en === my) { en.phase = 'retry'; en.msg = 'Something went wrong. Try again.'; renderEnroll(); } return; }
+    en.samples.push(emb); en.all.push(t.audio);
+    en.step++;
+    if (en.step >= PROMPTS.length) {
+      // One extra sample from everything together
+      const len = Math.min(sr * 20, en.all.reduce((a, x) => a + x.length, 0)), all = new Float32Array(len); let o = 0;
+      for (const x of en.all) { if (o >= len) break; const part = x.subarray(0, len - o); all.set(part, o); o += part.length; }
+      try { const e2 = await embed(all, sr); if (e2) en.samples.push(e2); } catch (err) {}
+      if (en !== my) return;
+      en.p.samples = en.samples.map(x => ({ e: round(x), src: 'enroll' }));
+      save(); en.phase = 'test';
+    } else en.phase = 'ready';
+    renderEnroll();
+  }
+  async function testStep() {
+    const my = en; en.phase = 'testing'; en.test = null; renderEnroll();
+    await sleep(3000); if (en !== my) return;
+    const sr = ctx.sampleRate, t = trimVoiced(getClip(3), sr, 42);
+    let emb = null;
+    if (t.voicedSec >= 0.6) { try { emb = await embed(t.audio, sr); } catch (err) {} }
+    if (en !== my) return;
+    en.test = emb ? Object.assign(match(emb), { emb }) : { ok: false, all: [], emb: null };
+    en.phase = 'tested'; renderEnroll();
+  }
+
+  // ---------- mic permission screen, install, offline ----------
+  (async () => {
+    let granted = false;
+    try { granted = (await navigator.permissions.query({ name: 'microphone' })).state === 'granted'; } catch (e) {}
+    if (!granted) document.body.classList.add('needs-mic');
+  })();
+  if (state.modelsCached) setTimeout(loadModels, 600);
+  if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  let deferredPrompt = null;
+  if (!standalone) {
+    if (isIOS) { $('installText').innerHTML = 'To add Quite You to your home screen: tap <b>Share</b> in Safari, then <b>Add to Home Screen</b>.'; $('install').classList.add('show'); }
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; $('installBtn').hidden = false; $('install').classList.add('show'); });
+    $('installBtn').addEventListener('click', async () => { if (!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; $('install').classList.remove('show'); });
+    window.addEventListener('appinstalled', () => $('install').classList.remove('show'));
+  }
+
+  bindSettings(); render();
+  setInterval(renderLast, 60000);
 })();
 </script>
 </body>
